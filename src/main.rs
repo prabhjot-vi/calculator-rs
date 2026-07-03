@@ -1,5 +1,4 @@
 use core::panic;
-use std::ops::Index;
 
 #[derive(Debug)]
 enum Token {
@@ -8,8 +7,8 @@ enum Token {
     RParem,
     Mul,
     Div,
-    Plus,
-    Mins,
+    Add,
+    Sub,
 }
 
 fn lexer(expr: &str) -> Vec<Token> {
@@ -26,8 +25,8 @@ fn lexer(expr: &str) -> Vec<Token> {
                 ')' => tokens.push(Token::RParem),
                 '*' => tokens.push(Token::Mul),
                 '/' => tokens.push(Token::Div),
-                '+' => tokens.push(Token::Plus),
-                '-' => tokens.push(Token::Mins),
+                '+' => tokens.push(Token::Add),
+                '-' => tokens.push(Token::Sub),
                 e => panic!("Unknown char: {}", e),
             }
         }
@@ -36,9 +35,33 @@ fn lexer(expr: &str) -> Vec<Token> {
     tokens
 }
 
+#[derive(Debug)]
+enum Expression {
+    Atom(u16),
+    Operation(Token, Box<Expression>, Box<Expression>),
+    None,
+}
+
+fn parser(tokens: Vec<Token>) -> Expression {
+    let root = Expression::Operation(
+        Token::Add,
+        Box::new(Expression::Operation(
+            Token::Mul,
+            Box::new(Expression::Atom(10)),
+            Box::new(Expression::Atom(5)),
+        )),
+        Box::new(Expression::Atom(20)),
+    );
+
+    root
+}
+
 fn main() {
     let expr = "1 + 2 * 3";
-    let tkns = lexer(expr);
+    let tokens = lexer(expr);
 
-    println!("{:?}", tkns);
+    println!("{:?}", tokens);
+
+    let root = parser(tokens);
+    println!("{:?}", root);
 }
